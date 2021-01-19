@@ -1,0 +1,33 @@
+language: c
+arch: arm64
+
+git:
+     depth: 1
+
+before_install:
+    - sudo apt-get -y install git curl
+
+before_script:
+    - export AGL_TOP=$HOME/AGL
+    - mkdir -p $AGL_TOP
+    - mkdir -p $HOME/bin
+    - export PATH=$HOME/bin:$PATH
+    - curl https://storage.googleapis.com/git-repo-downloads/repo > $HOME/bin/repo
+    - chmod a+x $HOME/bin/repo
+    - cd $AGL_TOP
+    - mkdir jellyfish
+    - cd jellyfish
+    - repo init -b jellyfish -u https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo
+    - repo sync
+    - pwd
+    - git clone https://github.com/elisa-tech/meta-elisa.git
+
+script:
+    - source meta-agl/scripts/aglsetup.sh -f -m qemux86-64 elisa-cluster-demo
+    - pwd
+    - echo 'SSTATE_MIRRORS ?= "file://.* http://sstate.yoctoproject.org/3.1.2/PATH;downloadfilename=PATH"' >> conf/local.conf
+    - echo 'SSTATE_MIRRORS += "file://.* http://download.automotivelinux.org/sstate-mirror/${AGL_BRANCH}/${DEFAULTTUNE}/PATH;downloadfilename=PATH"' >> conf/local.conf
+    - echo 'BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"' >> conf/local.conf
+    - echo 'PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"' >> conf/local.conf
+    - tail -n 4 conf/local.conf
+    - bitbake elisa-cluster-demo-platform
