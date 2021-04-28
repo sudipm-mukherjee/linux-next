@@ -909,7 +909,7 @@ new_bio:
 					" %d i: %d bio: %p, allocating another"
 					" bio\n", bio->bi_vcnt, i, bio);
 
-				rc = blk_rq_append_bio(req, &bio);
+				rc = blk_rq_append_bio(req, bio);
 				if (rc) {
 					pr_err("pSCSI: failed to append bio\n");
 					goto fail;
@@ -928,7 +928,7 @@ new_bio:
 	}
 
 	if (bio) {
-		rc = blk_rq_append_bio(req, &bio);
+		rc = blk_rq_append_bio(req, bio);
 		if (rc) {
 			pr_err("pSCSI: failed to append bio\n");
 			goto fail;
